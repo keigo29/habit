@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="習慣">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="fonts/zen-kaku-gothic-new.css">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>習慣</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f4f4f5;
+    --surface-2: #e9e9eb;
+    --text: #0a0a0a;
+    --muted: #8a8a8e;
+    --line: #ececee;
+    --danger: #e5484d;
+    --grad: linear-gradient(135deg, #3a3a3c 0%, #000000 100%);
+    --on-grad: #ffffff;
+    --strong: var(--grad);
+    --on-strong: #ffffff;
+    --ring: #0a0a0a;
+    --radius-lg: 28px;
+    --radius-md: 20px;
+    --heat-1: #d4d4d8;
+    --heat-2: #8e8e93;
+    --heat-3: #3a3a3c;
+    --heat-4: #000000;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --surface: #161618;
+      --surface-2: #232326;
+      --text: #f5f5f5;
+      --muted: #8e8e93;
+      --line: #222225;
+      --grad: linear-gradient(135deg, #48484a 0%, #1c1c1e 100%);
+      --ring: #f5f5f5;
+      --strong: linear-gradient(135deg, #ffffff 0%, #c7c7cc 100%);
+      --on-strong: #000000;
+      --heat-1: #2c2c2e;
+      --heat-2: #48484a;
+      --heat-3: #8e8e93;
+      --heat-4: #f5f5f5;
+    }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: "Zen Kaku Gothic New", BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-feature-settings: "palt";
+    min-height: 100dvh;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 0; background: none; }
+  .app { max-width: 520px; margin: 0 auto; padding: calc(16px + env(safe-area-inset-top)) 20px 0; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; height: 44px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border-radius: 999px; padding: 8px 14px; font-size: 14px; font-weight: 600; }
+  .icon-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; }
+  .icon-btn svg { width: 20px; height: 20px; }
+  h1 { font-size: 34px; letter-spacing: -0.03em; font-weight: 700; margin: 20px 0 4px; }
+  .sub { color: var(--muted); font-size: 15px; margin: 0 0 24px; }
+
+  .hero { background: var(--surface); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; }
+  .hero .label { color: var(--muted); font-size: 14px; font-weight: 500; }
+  .hero .big { font-size: 48px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; margin: 6px 0 2px; }
+  .hero .big small { font-size: 20px; font-weight: 600; color: var(--muted); margin-left: 4px; letter-spacing: 0; }
+  .bar { height: 8px; border-radius: 999px; background: var(--bg); margin-top: 14px; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 999px; background: var(--strong); transition: width .35s ease; }
+
+  .week { display: flex; justify-content: space-between; margin-top: 20px; }
+  .day { padding: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .dot { width: 36px; height: 36px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--text); position: relative; }
+  .dot.full { background: var(--strong); color: var(--on-strong); }
+  .dot.sel { outline: 2px solid var(--ring); outline-offset: 2px; }
+  .dot.future { opacity: .35; }
+
+  .pill { flex: 1; height: 56px; border-radius: 999px; background: var(--grad); color: var(--on-grad); font-size: 17px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s ease, opacity .12s; }
+  .pill:active { transform: scale(.97); opacity: .9; }
+  .pill svg { width: 20px; height: 20px; }
+
+  .section-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin: 28px 0 12px; display: flex; justify-content: space-between; align-items: baseline; }
+  .section-title span { font-size: 14px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+  .list { background: var(--surface); border-radius: var(--radius-lg); overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 14px 16px 14px 20px; width: 100%; text-align: left; }
+  .row + .row { border-top: 1px solid var(--line); }
+  .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; flex: 0 0 auto; }
+  .row .main { flex: 1; min-width: 0; text-align: left; }
+  .row .name { font-weight: 600; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .meta { color: var(--muted); font-size: 13px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row.done .name { color: var(--muted); }
+  .row .end { text-align: right; font-weight: 600; font-size: 15px; }
+  .row .end .meta { margin-top: 2px; }
+
+  .check { width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto; display: grid; place-items: center; background: var(--bg); transition: transform .15s ease; }
+  .check svg { width: 22px; height: 22px; opacity: 0; transition: opacity .15s; }
+  .check.on { background: var(--strong); color: var(--on-strong); }
+  .check.on svg { opacity: 1; }
+  .check:active { transform: scale(.88); }
+  .check:disabled { opacity: .35; }
+
+  .mini { display: flex; gap: 4px; margin-top: 8px; }
+  .mini i { width: 10px; height: 10px; border-radius: 3px; background: var(--bg); }
+  .mini i.on { background: var(--strong); }
+  .mini i.off { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+
+  .empty { background: var(--surface); border-radius: var(--radius-lg); padding: 40px 24px; text-align: center; color: var(--muted); }
+  .empty .em-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--bg); display: grid; place-items: center; margin: 0 auto 14px; }
+  .empty b { display: block; color: var(--text); font-size: 17px; margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tile { background: var(--surface); border-radius: var(--radius-md); padding: 18px; }
+  .tile .label { color: var(--muted); font-size: 13px; }
+  .tile .val { font-size: 28px; font-weight: 700; letter-spacing: -0.03em; margin-top: 6px; }
+  .tile .val small { font-size: 14px; color: var(--muted); font-weight: 600; margin-left: 2px; }
+
+  /* 月カレンダー */
+  .cal { background: var(--surface); border-radius: var(--radius-lg); padding: 18px 16px 20px; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 4px; }
+  .cal-head b { font-size: 17px; }
+  .cal-head .icon-btn { width: 36px; height: 36px; background: var(--bg); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-grid .wd { text-align: center; font-size: 11px; color: var(--muted); padding-bottom: 4px; }
+  .cell { aspect-ratio: 1; border-radius: 10px; background: var(--bg); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .cell.h1 { background: var(--heat-1); color: var(--text); }
+  .cell.h2 { background: var(--heat-2); color: #fff; }
+  .cell.h3 { background: var(--heat-3); color: #fff; }
+  .cell.h4 { background: var(--heat-4); color: var(--bg); }
+  .cell.today { outline: 2px solid var(--ring); outline-offset: 1px; }
+  .cell.blank { background: transparent; }
+  .legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-size: 11px; color: var(--muted); margin-top: 12px; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; background: var(--bg); }
+
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 10px 20px calc(10px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--line); }
+  .tabbar-inner { max-width: 520px; margin: 0 auto; display: flex; justify-content: space-around; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 16px; }
+  .tab svg { width: 24px; height: 24px; }
+  .tab.active { color: var(--text); }
+
+  .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 20; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; max-width: 520px; margin: 0 auto; max-height: 92dvh; overflow-y: auto; background: var(--bg); border-radius: 32px 32px 0 0; padding: 10px 20px calc(24px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .32s cubic-bezier(.2,.9,.3,1); }
+  .sheet.open { transform: translateY(0); }
+  .grabber { width: 40px; height: 5px; border-radius: 3px; background: var(--surface-2); margin: 0 auto 14px; }
+  .sheet h2 { font-size: 24px; letter-spacing: -0.02em; margin: 6px 0 20px; display: flex; justify-content: space-between; align-items: center; }
+
+  .field { background: var(--surface); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 12px; }
+  .field label, .field .lab { display: block; font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
+  .field input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 17px; font-weight: 600; padding: 2px 0; }
+
+  .ipicks { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 8px; }
+  .ipick { aspect-ratio: 1; border-radius: 50%; background: var(--bg); display: grid; place-items: center; }
+  .ipick svg { width: 20px; height: 20px; }
+  .ipick.on { background: var(--strong); color: var(--on-strong); }
+
+  .days { display: flex; justify-content: space-between; margin-top: 8px; }
+  .dchip { width: 38px; height: 38px; border-radius: 50%; background: var(--bg); font-size: 14px; font-weight: 600; }
+  .dchip.on { background: var(--strong); color: var(--on-strong); }
+  .quick { display: flex; gap: 8px; margin-top: 10px; }
+  .quick button { background: var(--bg); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 600; }
+
+  .text-danger { color: var(--danger); font-weight: 600; font-size: 15px; padding: 14px; width: 100%; }
+  .toast { position: fixed; left: 50%; bottom: calc(110px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); background: var(--grad); color: var(--on-grad); padding: 12px 20px; border-radius: 999px; font-weight: 600; font-size: 14px; opacity: 0; transition: all .25s; z-index: 30; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .hidden { display: none !important; }
+  /* Lucide icons */
+  [data-icon] { display: contents; }
+  .lucide { width: 24px; height: 24px; flex: 0 0 auto; }
+  .avatar svg { width: 22px; height: 22px; }
+  .empty .em-icon svg { width: 28px; height: 28px; }
+  .check svg { stroke-width: 2.6; }
+  .pill svg { stroke-width: 2.4; }
+  .footnote { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 14px 4px 0; }
+  .add-row { width: 100%; padding: 16px; font-weight: 600; font-size: 15px; color: var(--muted); border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 今日 -->
+  <section id="view-today">
+    <div class="top">
+      <div class="chip" id="dateChip"></div>
+      <button class="icon-btn" aria-label="データ" data-go="data">
+        <i data-icon="download"></i>
+      </button>
+    </div>
+    <h1 id="todayTitle">今日</h1>
+    <p class="sub" id="greet"></p>
+
+    <div class="hero">
+      <div class="label" id="heroLabel">今日の達成</div>
+      <div class="big" id="progressBig">0<small>/ 0</small></div>
+      <div class="bar"><i id="progressBar" style="width:0%"></i></div>
+      <div class="week" id="weekStrip"></div>
+    </div>
+
+    <div id="todayList"></div>
+    <div id="restList"></div>
+  </section>
+
+  <!-- 習慣一覧 -->
+  <section id="view-habits" class="hidden">
+    <div class="top"><div class="chip" id="habitCountChip">0個</div></div>
+    <h1>習慣</h1>
+    <p class="sub">タップすると編集できます</p>
+    <div id="habitList"></div>
+    <div style="margin-top:16px"><button class="pill" id="addBtn2">
+      <i data-icon="plus"></i>習慣を追加</button></div>
+  </section>
+
+  <!-- 振り返り -->
+  <section id="view-review" class="hidden">
+    <div class="top"><div class="chip">振り返り</div></div>
+    <h1>振り返り</h1>
+    <p class="sub">続けた日が濃くなります</p>
+    <div class="grid2" id="tiles"></div>
+    <div class="section-title">カレンダー</div>
+    <div class="cal">
+      <div class="cal-head">
+        <button class="icon-btn" id="prevMonth" aria-label="前の月"><i data-icon="chevron-left"></i></button>
+        <b id="monthLabel"></b>
+        <button class="icon-btn" id="nextMonth" aria-label="次の月"><i data-icon="chevron-right"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="legend">少ない<i style="background:var(--heat-1)"></i><i style="background:var(--heat-2)"></i><i style="background:var(--heat-3)"></i><i style="background:var(--heat-4)"></i>すべて達成</div>
+    </div>
+    <div class="section-title">習慣ごとの達成率 <span>直近30日</span></div>
+    <div id="rateList"></div>
+  </section>
+
+  <!-- データ -->
+  <section id="view-data" class="hidden">
+    <div class="top">
+      <button class="icon-btn" aria-label="戻る" data-go="today"><i data-icon="chevron-left"></i></button>
+    </div>
+    <h1>データ</h1>
+    <p class="sub">記録はこの端末の中だけに保存されています</p>
+    <div class="list">
+      <button class="row" id="exportBtn"><div class="avatar"><i data-icon="download"></i></div><div class="main"><div class="name">バックアップを書き出す</div><div class="meta">JSONファイルとして保存</div></div></button>
+      <button class="row" id="importBtn"><div class="avatar"><i data-icon="upload"></i></div><div class="main"><div class="name">バックアップから復元</div><div class="meta">書き出したJSONを読み込む</div></div></button>
+      <button class="row" id="wipeBtn"><div class="avatar" style="color:var(--danger)"><i data-icon="trash-2"></i></div><div class="main"><div class="name" style="color:var(--danger)">すべて削除</div><div class="meta">元に戻せません</div></div></button>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+    <p class="footnote">アプリを削除したり機種変更したりするとデータは消えます。ときどきバックアップを書き出しておくと安心です。</p>
+  </section>
+</div>
+
+<nav class="tabbar">
+  <div class="tabbar-inner">
+    <button class="tab active" data-go="today">
+      <i data-icon="circle-check-big"></i>今日</button>
+    <button class="tab" data-go="habits">
+      <i data-icon="list-checks"></i>習慣</button>
+    <button class="tab" data-go="review">
+      <i data-icon="calendar-days"></i>振り返り</button>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="grabber"></div>
+  <h2><span id="sheetTitle">習慣を追加</span>
+    <button class="icon-btn" id="closeSheet" aria-label="閉じる"><i data-icon="x"></i></button>
+  </h2>
+  <div class="field">
+    <label for="fName">名前</label>
+    <input id="fName" placeholder="例：水を2L飲む" autocomplete="off" maxlength="30">
+  </div>
+  <div class="field">
+    <div class="lab">アイコン</div>
+    <div class="ipicks" id="ipicks"></div>
+  </div>
+  <div class="field">
+    <div class="lab">やる曜日</div>
+    <div class="days" id="days"></div>
+    <div class="quick">
+      <button data-quick="all">毎日</button>
+      <button data-quick="weekday">平日</button>
+      <button data-quick="weekend">週末</button>
+    </div>
+  </div>
+  <button class="pill" id="saveBtn" style="margin-top:8px">保存する</button>
+  <button class="text-danger hidden" id="deleteBtn">この習慣を削除</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  // Lucide (https://lucide.dev) — ISC License。使うアイコンだけを埋め込み、オフラインでも表示できるようにしている
+  const ICONS = {"droplet":"<path d=\"M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z\"/>","glass-water":"<path d=\"M5.116 4.104A1 1 0 0 1 6.11 3h11.78a1 1 0 0 1 .994 1.105L17.19 20.21A2 2 0 0 1 15.2 22H8.8a2 2 0 0 1-2-1.79z\"/><path d=\"M6 12a5 5 0 0 1 6 0 5 5 0 0 0 6 0\"/>","footprints":"<path d=\"M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z\"/><path d=\"M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z\"/><path d=\"M16 17h4\"/><path d=\"M4 13h4\"/>","bike":"<circle cx=\"18.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"5.5\" cy=\"17.5\" r=\"3.5\"/><circle cx=\"15\" cy=\"5\" r=\"1\"/><path d=\"M12 17.5V14l-3-3 4-3 2 3h2\"/>","dumbbell":"<path d=\"M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z\"/><path d=\"m2.5 21.5 1.4-1.4\"/><path d=\"m20.1 3.9 1.4-1.4\"/><path d=\"M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z\"/><path d=\"m9.6 14.4 4.8-4.8\"/>","person-standing":"<circle cx=\"12\" cy=\"5\" r=\"1\"/><path d=\"m9 20 3-6 3 6\"/><path d=\"m6 8 6 2 6-2\"/><path d=\"M12 10v4\"/>","book-open":"<path d=\"M12 5v16\"/><path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\"/>","pen-line":"<path d=\"M13 21h8\"/><path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/>","languages":"<path d=\"m5 8 6 6\"/><path d=\"m4 14 6-6 2-3\"/><path d=\"M2 5h12\"/><path d=\"M7 2h1\"/><path d=\"m22 22-5-10-5 10\"/><path d=\"M14 18h6\"/>","code":"<path d=\"m16 18 6-6-6-6\"/><path d=\"m8 6-6 6 6 6\"/>","brain":"<path d=\"M12 18V5\"/><path d=\"M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4\"/><path d=\"M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5\"/><path d=\"M17.997 5.125a4 4 0 0 1 2.526 5.77\"/><path d=\"M18 18a4 4 0 0 0 2-7.464\"/><path d=\"M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517\"/><path d=\"M6 18a4 4 0 0 1-2-7.464\"/><path d=\"M6.003 5.125a4 4 0 0 0-2.526 5.77\"/>","flower-2":"<path d=\"M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M12 10v12\"/><path d=\"M12 22c4.2 0 7-1.667 7-5-4.2 0-7 1.667-7 5Z\"/><path d=\"M12 22c-4.2 0-7-1.667-7-5 4.2 0 7 1.667 7 5Z\"/>","bed":"<path d=\"M2 4v16\"/><path d=\"M2 8h18a2 2 0 0 1 2 2v10\"/><path d=\"M2 17h20\"/><path d=\"M6 8v9\"/>","moon":"<path d=\"M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/>","salad":"<path d=\"M7 21h10\"/><path d=\"M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9Z\"/><path d=\"M11.38 12a2.4 2.4 0 0 1-.4-4.77 2.4 2.4 0 0 1 3.2-2.77 2.4 2.4 0 0 1 3.47-.63 2.4 2.4 0 0 1 3.37 3.37 2.4 2.4 0 0 1-1.1 3.7 2.51 2.51 0 0 1 .03 1.1\"/><path d=\"m13 12 4-4\"/><path d=\"M10.9 7.25A3.99 3.99 0 0 0 4 10c0 .73.2 1.41.54 2\"/>","apple":"<path d=\"M12 6.528V3a1 1 0 0 1 1-1h0\"/><path d=\"M18.237 21A15 15 0 0 0 22 11a6 6 0 0 0-10-4.472A6 6 0 0 0 2 11a15.1 15.1 0 0 0 3.763 10 3 3 0 0 0 3.648.648 5.5 5.5 0 0 1 5.178 0A3 3 0 0 0 18.237 21\"/>","pill":"<path d=\"m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z\"/><path d=\"m8.5 8.5 7 7\"/>","sprout":"<path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\"/><path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\"/><path d=\"M5 21h14\"/>","sparkles":"<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\"/><path d=\"M20 2v4\"/><path d=\"M22 4h-4\"/><circle cx=\"4\" cy=\"20\" r=\"2\"/>","headphones":"<path d=\"M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3\"/>","music":"<path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/>","piggy-bank":"<path d=\"M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z\"/><path d=\"M16 10h.01\"/><path d=\"M2 8v1a2 2 0 0 0 2 2h1\"/>","phone-off":"<path d=\"M10.1 13.9a14 14 0 0 0 3.732 2.668 1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2 18 18 0 0 1-12.728-5.272\"/><path d=\"M22 2 2 22\"/><path d=\"M4.76 13.582A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 .244.473\"/>","download":"<path d=\"M12 15V3\"/><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/><path d=\"m7 10 5 5 5-5\"/>","upload":"<path d=\"M12 3v12\"/><path d=\"m17 8-5-5-5 5\"/><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/>","trash-2":"<path d=\"M10 11v6\"/><path d=\"M14 11v6\"/><path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/><path d=\"M3 6h18\"/><path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>","plus":"<path d=\"M5 12h14\"/><path d=\"M12 5v14\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","x":"<path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/>","chevron-left":"<path d=\"m15 18-6-6 6-6\"/>","chevron-right":"<path d=\"m9 18 6-6-6-6\"/>","circle-check-big":"<path d=\"M21.801 10A10 10 0 1 1 17 3.335\"/><path d=\"m9 11 3 3L22 4\"/>","list-checks":"<path d=\"M13 5h8\"/><path d=\"M13 12h8\"/><path d=\"M13 19h8\"/><path d=\"m3 17 2 2 4-4\"/><path d=\"m3 7 2 2 4-4\"/>","calendar-days":"<path d=\"M8 2v3\"/><path d=\"M16 2v3\"/><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M8 13h.01\"/><path d=\"M12 13h.01\"/><path d=\"M16 13h.01\"/><path d=\"M8 17h.01\"/><path d=\"M12 17h.01\"/><path d=\"M16 17h.01\"/>","coffee":"<path d=\"M10 2v2\"/><path d=\"M14 2v2\"/><path d=\"M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1\"/><path d=\"M6 2v2\"/>","smile":"<path d=\"M15 10V9\"/><path d=\"M16.472 15a6 6 0 01-8.943 0\"/><path d=\"M9 10V9\"/><circle cx=\"12\" cy=\"12\" r=\"10\"/>"};
+  const icon = (n) => `<svg class="lucide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ICONS['circle-check-big']}</svg>`;
+  document.querySelectorAll('[data-icon]').forEach((el) => { el.innerHTML = icon(el.dataset.icon); });
+
+  const KEY = 'habit-app-v1';
+  const HABIT_ICONS = ["droplet", "glass-water", "footprints", "bike", "dumbbell", "person-standing", "book-open", "pen-line", "languages", "code", "brain", "flower-2", "bed", "moon", "sun", "salad", "apple", "pill", "sprout", "sparkles", "headphones", "music", "piggy-bank", "phone-off"];
+  // 以前の絵文字データからの移行用
+  const FROM_EMOJI = { '💧': 'droplet', '🏃': 'footprints', '📚': 'book-open', '🧘': 'flower-2', '💪': 'dumbbell', '🛏️': 'bed', '🥗': 'salad', '✍️': 'pen-line', '🎧': 'headphones', '🧹': 'sparkles', '💊': 'pill', '🌱': 'sprout', '☀️': 'sun', '🚶': 'person-standing', '🦷': 'smile', '📵': 'phone-off' };
+  const WD = ['日', '月', '火', '水', '木', '金', '土'];
+  const ORDER = [1, 2, 3, 4, 5, 6, 0]; // 月曜はじまりで表示
+  const $ = (s) => document.querySelector(s);
+
+  // ---- 保存（端末内のlocalStorage） ----
+  // habits: [{ id, name, icon, days:[0-6], createdAt:'YYYY-MM-DD', order }]
+  // logs:   { 'YYYY-MM-DD': [habitId, ...] }
+  function migrate(d) {
+    d.habits.forEach((h) => { if (!h.icon) h.icon = FROM_EMOJI[h.emoji] || 'circle-check-big'; delete h.emoji; });
+    return d;
+  }
+  function load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY));
+      if (d && Array.isArray(d.habits) && d.logs) return migrate(d);
+    } catch (e) {}
+    return { version: 1, habits: [], logs: {} };
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { toast('保存できませんでした'); }
+  }
+  let db = load();
+  save(); // 移行した内容を保存しておく
+
+  // ---- 日付ユーティリティ ----
+  const pad = (n) => String(n).padStart(2, '0');
+  const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const parse = (s) => new Date(s + 'T00:00');
+  const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ymd(d); };
+  const today = () => ymd(new Date());
+  const fmtDate = (s) => { const d = parse(s); return `${d.getMonth() + 1}月${d.getDate()}日（${WD[d.getDay()]}）`; };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  const isDone = (h, date) => (db.logs[date] || []).includes(h.id);
+  const isScheduled = (h, date) => date >= h.createdAt && h.days.includes(parse(date).getDay());
+  const habitsOn = (date) => db.habits.filter((h) => isScheduled(h, date));
+  const sorted = () => db.habits.slice().sort((a, b) => a.order - b.order);
+
+  function toggle(h, date) {
+    const arr = db.logs[date] || (db.logs[date] = []);
+    const i = arr.indexOf(h.id);
+    if (i >= 0) arr.splice(i, 1); else arr.push(h.id);
+    if (!arr.length) delete db.logs[date];
+    save();
+    return i < 0;
+  }
+
+  // 連続日数：予定日だけを数える。今日が未達成なら昨日から数える
+  function streak(h) {
+    let d = today(), n = 0;
+    if (isScheduled(h, d) && !isDone(h, d)) d = addDays(d, -1);
+    for (let k = 0; k < 3650 && d >= h.createdAt; k++, d = addDays(d, -1)) {
+      if (!h.days.includes(parse(d).getDay())) continue;
+      if (isDone(h, d)) n++; else break;
+    }
+    return n;
+  }
+  function bestStreak(h) {
+    let best = 0, cur = 0;
+    for (let d = h.createdAt, t = today(); d <= t; d = addDays(d, 1)) {
+      if (!h.days.includes(parse(d).getDay())) continue;
+      if (isDone(h, d)) { cur++; best = Math.max(best, cur); } else if (d !== t) cur = 0;
+    }
+    return best;
+  }
+  function rate(h, days) {
+    let due = 0, done = 0;
+    for (let i = 0; i < days; i++) {
+      const d = addDays(today(), -i);
+      if (!isScheduled(h, d)) continue;
+      due++; if (isDone(h, d)) done++;
+    }
+    return due ? Math.round((done / due) * 100) : null;
+  }
+  const daysText = (days) => {
+    const s = [...days].sort().join('');
+    if (s === '0123456') return '毎日';
+    if (s === '12345') return '平日';
+    if (s === '06') return '週末';
+    return ORDER.filter((d) => days.includes(d)).map((d) => WD[d]).join('・');
+  };
+
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  // ---- 画面切り替え ----
+  let current = 'today';
+  let selDate = today();
+  let calMonth = (() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1); })();
+  function go(view) {
+    current = view;
+    ['today', 'habits', 'review', 'data'].forEach((v) => $('#view-' + v).classList.toggle('hidden', v !== view));
+    document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('active', t.dataset.go === view));
+    render(); window.scrollTo(0, 0);
+  }
+
+  document.addEventListener('click', (e) => {
+    const g = e.target.closest('[data-go]'); if (g) return go(g.dataset.go);
+    const c = e.target.closest('[data-check]');
+    if (c) {
+      const h = db.habits.find((x) => x.id === c.dataset.check);
+      const on = toggle(h, selDate);
+      if (on) { const s = streak(h); toast(s >= 2 && selDate === today() ? `${s}日連続！` : '達成しました'); }
+      return render();
+    }
+    const ed = e.target.closest('[data-edit]'); if (ed) return openSheet(ed.dataset.edit);
+    const day = e.target.closest('[data-day]'); if (day) { selDate = day.dataset.day; return render(); }
+  });
+
+  // ---- 描画：今日 ----
+  const checkSVG = icon('check');
+
+  function habitRow(h, date, canCheck) {
+    const done = isDone(h, date);
+    const s = streak(h);
+    // 直近7日のミニ表示
+    let mini = '';
+    for (let i = 6; i >= 0; i--) {
+      const d = addDays(today(), -i);
+      mini += `<i class="${!isScheduled(h, d) ? 'off' : isDone(h, d) ? 'on' : ''}"></i>`;
+    }
+    return `<div class="row ${done ? 'done' : ''}">
+      <button class="avatar" data-edit="${h.id}" aria-label="編集">${icon(h.icon)}</button>
+      <button class="main" data-edit="${h.id}">
+        <div class="name">${esc(h.name)}</div>
+        <div class="meta">${s ? `${s}日連続 ・ ` : ''}${daysText(h.days)}</div>
+        <div class="mini">${mini}</div>
+      </button>
+      <button class="check ${done ? 'on' : ''}" data-check="${h.id}" ${canCheck ? '' : 'disabled'} aria-label="${esc(h.name)}を${done ? '未達成に戻す' : '達成にする'}">${checkSVG}</button>
+    </div>`;
+  }
+
+  const emptyHTML = (icon, title, body, withBtn) => `<div class="empty"><div class="em-icon">${icon}</div><b>${title}</b>${body}
+    ${withBtn ? '<div style="margin-top:20px"><button class="pill" id="addBtnEmpty">最初の習慣を追加</button></div>' : ''}</div>`;
+
+  function renderToday() {
+    const t = today();
+    const isToday = selDate === t;
+    $('#dateChip').textContent = fmtDate(selDate);
+    $('#todayTitle').textContent = isToday ? '今日' : fmtDate(selDate).replace(/（.*/, '');
+    const hr = new Date().getHours();
+    $('#greet').textContent = !isToday ? 'あとから記録をつけられます' : hr < 11 ? 'おはようございます。小さく始めましょう。' : hr < 18 ? 'こんにちは。調子はどうですか？' : 'お疲れさまです。今日を振り返りましょう。';
+    $('#heroLabel').textContent = isToday ? '今日の達成' : 'この日の達成';
+
+    const due = habitsOn(selDate).sort((a, b) => a.order - b.order);
+    const done = due.filter((h) => isDone(h, selDate)).length;
+    $('#progressBig').innerHTML = `${done}<small>/ ${due.length}</small>`;
+    $('#progressBar').style.width = due.length ? `${(done / due.length) * 100}%` : '0%';
+
+    // 直近7日（タップでその日を表示）
+    let html = '';
+    for (let i = 6; i >= 0; i--) {
+      const d = addDays(t, -i);
+      const hs = habitsOn(d);
+      const full = hs.length && hs.every((h) => isDone(h, d));
+      html += `<button class="day" data-day="${d}"><div class="dot ${full ? 'full' : ''} ${d === selDate ? 'sel' : ''}">${parse(d).getDate()}</div>${WD[parse(d).getDay()]}</button>`;
+    }
+    $('#weekStrip').innerHTML = html;
+
+    if (!db.habits.length) {
+      $('#todayList').innerHTML = emptyHTML(icon('sprout'), 'まだ習慣がありません', 'まずは1つだけ登録してみましょう', true);
+      $('#restList').innerHTML = '';
+      return;
+    }
+    const todo = due.filter((h) => !isDone(h, selDate));
+    const finished = due.filter((h) => isDone(h, selDate));
+    $('#todayList').innerHTML = due.length
+      ? `<div class="section-title">${todo.length ? 'やること' : 'すべて達成'} <span>${done === due.length ? 'おつかれさまでした' : `残り${todo.length}`}</span></div>
+         <div class="list">${[...todo, ...finished].map((h) => habitRow(h, selDate, true)).join('')}</div>`
+      : `<div class="section-title">やること</div>` + emptyHTML(icon('coffee'), 'この日は予定がありません', 'ゆっくり休みましょう');
+    const rest = sorted().filter((h) => !isScheduled(h, selDate) && selDate >= h.createdAt);
+    $('#restList').innerHTML = rest.length
+      ? `<div class="section-title">お休みの習慣 <span>${rest.length}</span></div><div class="list">${rest.map((h) => habitRow(h, selDate, false)).join('')}</div>`
+      : '';
+  }
+
+  // ---- 描画：習慣一覧 ----
+  function renderHabits() {
+    $('#habitCountChip').textContent = `${db.habits.length}個`;
+    $('#habitList').innerHTML = db.habits.length
+      ? `<div class="list">${sorted().map((h) => `<button class="row" data-edit="${h.id}">
+          <div class="avatar">${icon(h.icon)}</div>
+          <div class="main"><div class="name">${esc(h.name)}</div><div class="meta">${daysText(h.days)} ・ 最長${bestStreak(h)}日</div></div>
+          <div class="end">${streak(h)}<div class="meta">日連続</div></div></button>`).join('')}</div>`
+      : emptyHTML(icon('sprout'), 'まだ習慣がありません', '下のボタンから追加できます');
+  }
+
+  // ---- 描画：振り返り ----
+  function renderReview() {
+    const t = today();
+    let allDays = 0, fullDays = 0;
+    for (let i = 0; i < 30; i++) {
+      const d = addDays(t, -i); const hs = habitsOn(d);
+      if (!hs.length) continue;
+      allDays++; if (hs.every((h) => isDone(h, d))) fullDays++;
+    }
+    const totalChecks = Object.values(db.logs).reduce((a, v) => a + v.length, 0);
+    const longest = db.habits.reduce((m, h) => Math.max(m, bestStreak(h)), 0);
+    const rates = db.habits.map((h) => rate(h, 30)).filter((r) => r != null);
+    const avg = rates.length ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length) : 0;
+    $('#tiles').innerHTML = [
+      ['30日の達成率', avg, '%'],
+      ['全部できた日', fullDays, `/ ${allDays}日`],
+      ['最長連続', longest, '日'],
+      ['これまでの達成', totalChecks, '回'],
+    ].map(([l, v, u]) => `<div class="tile"><div class="label">${l}</div><div class="val">${v}<small>${u}</small></div></div>`).join('');
+
+    // 月カレンダー
+    const y = calMonth.getFullYear(), m = calMonth.getMonth();
+    $('#monthLabel').textContent = `${y}年${m + 1}月`;
+    const first = new Date(y, m, 1), last = new Date(y, m + 1, 0);
+    let g = ORDER.map((d) => `<div class="wd">${WD[d]}</div>`).join('');
+    const lead = (first.getDay() + 6) % 7;
+    for (let i = 0; i < lead; i++) g += '<div class="cell blank"></div>';
+    for (let day = 1; day <= last.getDate(); day++) {
+      const d = ymd(new Date(y, m, day));
+      const hs = habitsOn(d);
+      let cls = '';
+      if (hs.length && d <= t) {
+        const r = hs.filter((h) => isDone(h, d)).length / hs.length;
+        cls = r === 0 ? '' : r < 0.34 ? 'h1' : r < 0.67 ? 'h2' : r < 1 ? 'h3' : 'h4';
+      }
+      g += `<div class="cell ${cls} ${d === t ? 'today' : ''}">${day}</div>`;
+    }
+    $('#calGrid').innerHTML = g;
+    $('#nextMonth').disabled = y === new Date().getFullYear() && m === new Date().getMonth();
+    $('#nextMonth').style.opacity = $('#nextMonth').disabled ? .3 : 1;
+
+    $('#rateList').innerHTML = db.habits.length
+      ? `<div class="list">${sorted().map((h) => { const r = rate(h, 30); return `<div class="row">
+          <div class="avatar">${icon(h.icon)}</div>
+          <div class="main"><div class="name">${esc(h.name)}</div><div class="bar" style="margin-top:8px;background:var(--bg)"><i style="width:${r || 0}%"></i></div></div>
+          <div class="end">${r == null ? '—' : r + '%'}</div></div>`; }).join('')}</div>`
+      : emptyHTML(icon('calendar-days'), 'まだ記録がありません', '習慣を追加するとここに表示されます');
+  }
+  $('#prevMonth').addEventListener('click', () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); renderReview(); });
+  $('#nextMonth').addEventListener('click', () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1); renderReview(); });
+
+  function render() {
+    if (current === 'today') renderToday();
+    if (current === 'habits') renderHabits();
+    if (current === 'review') renderReview();
+  }
+
+  // ---- 追加・編集シート ----
+  let editingId = null, draft = null;
+  function renderSheetParts() {
+    $('#ipicks').innerHTML = HABIT_ICONS.map((n) => `<button class="ipick ${draft.icon === n ? 'on' : ''}" data-ipick="${n}" aria-label="${n}">${icon(n)}</button>`).join('');
+    $('#days').innerHTML = ORDER.map((d) => `<button class="dchip ${draft.days.includes(d) ? 'on' : ''}" data-dow="${d}">${WD[d]}</button>`).join('');
+  }
+  $('#ipicks').addEventListener('click', (e) => { const b = e.target.closest('[data-ipick]'); if (b) { draft.icon = b.dataset.ipick; renderSheetParts(); } });
+  $('#days').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-dow]'); if (!b) return;
+    const d = Number(b.dataset.dow);
+    draft.days = draft.days.includes(d) ? draft.days.filter((x) => x !== d) : [...draft.days, d];
+    renderSheetParts();
+  });
+  document.querySelector('.quick').addEventListener('click', (e) => {
+    const q = e.target.closest('[data-quick]'); if (!q) return;
+    draft.days = { all: [0, 1, 2, 3, 4, 5, 6], weekday: [1, 2, 3, 4, 5], weekend: [0, 6] }[q.dataset.quick];
+    renderSheetParts();
+  });
+
+  function openSheet(id) {
+    editingId = id || null;
+    const h = id && db.habits.find((x) => x.id === id);
+    draft = h ? { icon: h.icon, days: [...h.days] } : { icon: HABIT_ICONS[0], days: [0, 1, 2, 3, 4, 5, 6] };
+    $('#sheetTitle').textContent = h ? '習慣を編集' : '習慣を追加';
+    $('#fName').value = h ? h.name : '';
+    $('#deleteBtn').classList.toggle('hidden', !h);
+    renderSheetParts();
+    $('#scrim').classList.add('open'); $('#sheet').classList.add('open');
+    if (!h) setTimeout(() => $('#fName').focus(), 300);
+  }
+  function closeSheet() { $('#scrim').classList.remove('open'); $('#sheet').classList.remove('open'); $('#fName').blur(); }
+  $('#addBtn2').addEventListener('click', () => openSheet());
+  document.addEventListener('click', (e) => { if (e.target.closest('#addBtnEmpty')) openSheet(); });
+  $('#closeSheet').addEventListener('click', closeSheet);
+  $('#scrim').addEventListener('click', closeSheet);
+
+  $('#saveBtn').addEventListener('click', () => {
+    const name = $('#fName').value.trim();
+    if (!name) { toast('名前を入れてください'); $('#fName').focus(); return; }
+    if (!draft.days.length) { toast('曜日を1つ以上選んでください'); return; }
+    if (editingId) {
+      Object.assign(db.habits.find((x) => x.id === editingId), { name, icon: draft.icon, days: draft.days });
+    } else {
+      db.habits.push({ id: uid(), name, icon: draft.icon, days: draft.days, createdAt: today(), order: Date.now() });
+    }
+    save(); closeSheet(); render(); toast(editingId ? '更新しました' : '追加しました');
+  });
+  $('#deleteBtn').addEventListener('click', () => {
+    if (!confirm('この習慣と、これまでの記録を削除しますか？')) return;
+    db.habits = db.habits.filter((x) => x.id !== editingId);
+    Object.keys(db.logs).forEach((d) => { db.logs[d] = db.logs[d].filter((id) => id !== editingId); if (!db.logs[d].length) delete db.logs[d]; });
+    save(); closeSheet(); render(); toast('削除しました');
+  });
+
+  // ---- バックアップ ----
+  $('#exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `habit-backup-${today()}.json`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast('書き出しました');
+  });
+  $('#importBtn').addEventListener('click', () => $('#importFile').click());
+  $('#importFile').addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const d = JSON.parse(await f.text());
+      if (!d || !Array.isArray(d.habits) || typeof d.logs !== 'object') throw new Error();
+      if (!confirm(`${d.habits.length}個の習慣で置き換えます。よろしいですか？`)) return;
+      db = migrate({ version: 1, habits: d.habits, logs: d.logs }); save(); toast('復元しました');
+    } catch (err) { toast('ファイルを読み込めませんでした'); }
+    e.target.value = '';
+  });
+  $('#wipeBtn').addEventListener('click', () => {
+    if (!confirm('すべての習慣と記録を削除します。元に戻せません。')) return;
+    db = { version: 1, habits: [], logs: {} }; save(); toast('すべて削除しました');
+  });
+
+  // 日付が変わったら今日に戻す
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && selDate > today()) selDate = today();
+    if (document.visibilityState === 'visible') render();
+  });
+
+  go('today');
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
